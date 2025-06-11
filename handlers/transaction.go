@@ -20,15 +20,15 @@ func TransferHandler(w http.ResponseWriter, r *http.Request) {
 	time.Sleep(time.Duration(rand.Intn(100)) * time.Millisecond)
 
 	var current float64
-	db.QueryRow("SELECT amount FROM users WHERE id = ?", sourceID).Scan(&current)
+	db.QueryRow("SELECT balance FROM users WHERE id = ?", sourceID).Scan(&current)
 
 	if current < amount {
 		http.Error(w, "not enough balance", 400)
 		return
 	}
 
-	db.Exec("UPDATE users SET amount = amount - ? WHERE id = ?", amount, sourceID)
-	db.Exec("UPDATE users SET amount = amount + ? WHERE id = ?", amount, targetID)
+	db.Exec("UPDATE users SET balance = balance - ? WHERE id = ?", amount, sourceID)
+	db.Exec("UPDATE users SET balance = balance + ? WHERE id = ?", amount, targetID)
 
 	w.Write([]byte("transfer made successfully"))
 }

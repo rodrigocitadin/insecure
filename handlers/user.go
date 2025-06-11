@@ -18,7 +18,7 @@ func InitDB(database *sql.DB) {
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name TEXT,
 		password TEXT,
-		amount REAL DEFAULT 100.0
+		balance REAL DEFAULT 100.0
 	);`)
 }
 
@@ -43,7 +43,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 func UserHandler(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get("id")
-	row := db.QueryRow("SELECT id, name, amount FROM users WHERE id = ?", id)
+	row := db.QueryRow("SELECT id, name, balance FROM users WHERE id = ?", id)
 	var u models.User
 	if err := row.Scan(&u.ID, &u.Name, &u.Balance); err != nil {
 		http.Error(w, "user not found", 404)
@@ -53,7 +53,7 @@ func UserHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func DumpHandler(w http.ResponseWriter, r *http.Request) {
-	rows, _ := db.Query("SELECT id, name, pass, amount FROM users")
+	rows, _ := db.Query("SELECT id, name, pass, balance FROM users")
 	defer rows.Close()
 
 	var users []models.User
@@ -68,11 +68,11 @@ func DumpHandler(w http.ResponseWriter, r *http.Request) {
 func BalanceHandler(w http.ResponseWriter, r *http.Request) {
 	userID := r.Header.Get("Authorization")
 	fmt.Println(userID)
-	row := db.QueryRow("SELECT amount FROM users WHERE id = ?", userID[len("user-"):])
-	var amount float64
-	if err := row.Scan(&amount); err != nil {
+	row := db.QueryRow("SELECT balance FROM users WHERE id = ?", userID[len("user-"):])
+	var balance float64
+	if err := row.Scan(&balance); err != nil {
 		http.Error(w, "user not found", 404)
 		return
 	}
-	w.Write([]byte("Saldo: " + formatFloat(amount)))
+	w.Write([]byte("Saldo: " + formatFloat(balance)))
 }
